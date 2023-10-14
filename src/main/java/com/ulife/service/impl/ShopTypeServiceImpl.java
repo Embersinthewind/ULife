@@ -17,7 +17,7 @@ import static com.ulife.utils.RedisConstants.CACHE_SHOP_LIST_KEY;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author 虎哥

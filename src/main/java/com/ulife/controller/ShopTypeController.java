@@ -2,12 +2,14 @@ package com.ulife.controller;
 
 
 import com.ulife.dto.Result;
+import com.ulife.entity.ShopType;
 import com.ulife.service.IShopTypeService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -26,6 +28,9 @@ public class ShopTypeController {
     @GetMapping("list")
     public Result queryTypeList() {
 
-        return Result.ok(typeService.queryList());
+        // return Result.ok(typeService.queryList());
+        List<ShopType> typeList = typeService
+                .query().orderByAsc("sort").list();
+        return Result.ok(typeList);
     }
 }
