@@ -21,9 +21,7 @@ public interface IShopService extends IService<Shop> {
 
     Shop queryWithMutex(Long id);
 
-    boolean tryLock(String lockKey);
-
-    void unLock(String lockKey);
+    Shop queryWithLogiclExpire(Long id);
 
     Result update(Shop shop);
 }
