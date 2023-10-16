@@ -8,6 +8,7 @@ import com.ulife.entity.Shop;
 import com.ulife.mapper.ShopMapper;
 import com.ulife.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ulife.utils.CacheClient;
 import com.ulife.utils.RedisData;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    private CacheClient cacheClient;
+
     /**
      * 查询商铺
      *
@@ -45,8 +49,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
      */
     @Override
     public Result queryById(Long id) {
+
         // 1.设空值解决缓存穿透
-        // Shop shop = queryWithPassThrough(id);
+        // Shop shop = cacheClient.queryWithPassThrough(CACHE_SHOP_KEY, id, Shop.class, CACHE_SHOP_TTL, TimeUnit.MINUTES, this::getById);
 
         // 2.互斥锁解决缓存击穿
         // Shop shop = queryWithMutex(id);
@@ -55,7 +60,8 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         // }
 
         // 3.逻辑过期解决缓存击穿
-        Shop shop = queryWithLogiclExpire(id);
+        Shop shop = cacheClient.queryWithLogiclExpire(CACHE_SHOP_KEY, LOCK_SHOP_KEY, id, Shop.class, CACHE_SHOP_TTL, TimeUnit.MINUTES, this::getById);
+        // Shop shop=queryWithLogiclExpire(id);
         if (shop == null) {
             return Result.fail("店铺不存在！");
         }
@@ -149,6 +155,33 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         return shop;
     }
 
+    /**
+     * 为查询商铺缓存添加主动更新
+     *
+     * @param shop
+     * @return
+     */
+    @Override
+    @Transactional
+    public Result update(Shop shop) {
+        Long id = shop.getId();
+        if (id == null) {
+            return Result.fail("店铺id不能为空");
+        }
+        //1.根据id修改店铺
+        updateById(shop);
+        //2.删除缓存
+        stringRedisTemplate.delete(CACHE_SHOP_KEY + id);
+        return Result.ok();
+    }
+
+
+
+
+
+
+
+
     // 建立线程池
     private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
 
@@ -239,24 +272,6 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         stringRedisTemplate.delete(lockKey);
     }
 
-    /**
-     * 为查询商铺缓存添加主动更新
-     *
-     * @param shop
-     * @return
-     */
-    @Override
-    @Transactional
-    public Result update(Shop shop) {
-        Long id = shop.getId();
-        if (id == null) {
-            return Result.fail("店铺id不能为空");
-        }
-        //1.根据id修改店铺
-        updateById(shop);
-        //2.删除缓存
-        stringRedisTemplate.delete(CACHE_SHOP_KEY + id);
-        return Result.ok();
-    }
+
 
 }
