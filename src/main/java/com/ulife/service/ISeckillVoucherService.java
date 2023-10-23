@@ -1,5 +1,6 @@
 package com.ulife.service;
 
+import com.ulife.dto.Result;
 import com.ulife.entity.SeckillVoucher;
 import com.baomidou.mybatisplus.extension.service.IService;
 
