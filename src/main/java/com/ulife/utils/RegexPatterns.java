@@ -1,7 +1,7 @@
 package com.ulife.utils;
 
 /**
- * @author 虎哥
+ * @author 易屿
  */
 public abstract class RegexPatterns {
     /**

@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
  * 服务实现类
  * </p>
  *
- * @author 虎哥
+ * @author 易屿
  * @since 2021-12-22
  */
 @Service
@@ -38,7 +38,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
      * @return
      */
     @Override
-    @Transactional(rollbackFor = Exception.class) // 多表操作，最好添加一个事务，防止出现错误，好回滚事务
+    @Transactional(rollbackFor = Exception.class) 
     public Result seckillVoucher(Long voucherId) {
         //1.查询优惠券
         SeckillVoucher seckillVoucher = seckillVoucherService.getById(voucherId);
