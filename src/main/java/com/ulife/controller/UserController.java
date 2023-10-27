@@ -53,24 +53,41 @@ public class UserController {
     }
 
     /**
+     * 批量获取token的登录功能
+     */
+    // @PostMapping("/login")
+    // public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session) {
+    //     String phone = loginForm.getPhone();
+    //     String code = loginForm.getCode();
+    //     if (phone == null) {
+    //         return Result.fail("手机号为空！");
+    //     }
+    //     // if (code == null) {
+    //     //     return Result.fail("验证码为空！");
+    //     // }
+    //     return userService.login(loginForm, session);
+    // }
+
+    /**
      * 登出功能
+     *
      * @return 无
      */
     @PostMapping("/logout")
-    public Result logout(){
+    public Result logout() {
         // TODO 实现登出功能
         return Result.fail("功能未完成");
     }
 
     @GetMapping("/me")
-    public Result me(){
+    public Result me() {
         // 获取当前登录的用户并返回
         UserDTO user = UserHolder.getUser();
         return Result.ok(user);
     }
 
     @GetMapping("/info/{id}")
-    public Result info(@PathVariable("id") Long userId){
+    public Result info(@PathVariable("id") Long userId) {
         // 查询详情
         UserInfo info = userInfoService.getById(userId);
         if (info == null) {
