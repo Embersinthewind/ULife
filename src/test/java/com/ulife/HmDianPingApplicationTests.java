@@ -11,14 +11,12 @@ import com.ulife.utils.CacheClient;
 import com.ulife.utils.RedisWorker;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import javax.annotation.Resource;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.ulife.utils.RedisConstants.CACHE_SHOP_KEY;
-
 
 @SpringBootTest
 class HmDianPingApplicationTests {
