@@ -110,8 +110,8 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
     }
 
-
     /**
+     * lua脚本实现
      * 秒杀优惠券——超卖问题
      *
      * @param voucherId
@@ -189,7 +189,63 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     }
 
 
+
+
+
+
+
     /**
+     * lua脚本 Stream消息队列
+     * 秒杀优惠券——超卖问题
+     *
+     * @param voucherId
+     * @return
+     */
+   /* private IVoucherOrderService proxy;
+
+    @Override
+    public Result seckillVoucher(Long voucherId) {
+        //1.获取用户id
+        Long userId = UserHolder.getUser().getId();
+        //4.1订单ID
+        long orderId = redisWorker.nextId("order");
+        //2.执行lua脚本，返回结果
+        Long result = stringRedisTemplate.execute(
+                SECKILL_SCRIPT,
+                Collections.emptyList(),
+                 userId.toString());
+
+        int flag = result.intValue();
+        //3.对结果进行判断
+        if (flag != 0) {
+            // 3.1 返回结果不是0，创建订单失败
+            return Result.fail(flag == 1 ? "库存不足" : "不能重复下单！");
+        }
+
+        //3.2 返回结果为0，创建订单
+        //4.创建订单
+        VoucherOrder voucherOrder = new VoucherOrder();
+
+        voucherOrder.setId(orderId);
+        //4.2用户ID
+        userId = UserHolder.getUser().getId();
+        voucherOrder.setUserId(userId);
+        //4.3代金券ID
+        voucherOrder.setVoucherId(voucherId);
+
+        //5.将订单存在阻塞队列
+        orderTasks.add(voucherOrder);
+
+        //6. 获取到当前的代理对象
+        proxy = (IVoucherOrderService) AopContext.currentProxy();
+
+        //7.返回订单id
+        return Result.ok(orderId);
+    }*/
+
+
+    /**
+     * 分布式锁
      * 秒杀优惠券——超卖问题
      *
      * @param voucherId
