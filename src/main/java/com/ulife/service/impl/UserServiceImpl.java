@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,6 +103,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.ok(token);
     }
 
+
+
     private User createUserWithPhone(String phone) {
         // 1.创建用户
         User user = new User();
@@ -110,5 +113,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 2.保存用户
         save(user);
         return user;
+    }
+
+    @Override
+    public Result logout(HttpServletRequest request) {
+        // 从请求头获取token
+        String token = request.getHeader("token");
+
+        // 根据token进行登出
+        stringRedisTemplate.delete(LOGIN_USER_KEY + token);
+
+        return Result.ok();
     }
 }
