@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ulife.dto.Result;
 import com.ulife.dto.UserDTO;
 import com.ulife.entity.Blog;
+import com.ulife.entity.Follow;
 import com.ulife.entity.User;
 import com.ulife.mapper.BlogMapper;
 import com.ulife.service.IBlogService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ulife.service.IFollowService;
 import com.ulife.service.IUserService;
 import com.ulife.utils.SystemConstants;
 import com.ulife.utils.UserHolder;
@@ -25,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ulife.utils.RedisConstants.BLOG_LIKED_KEY;
+import static com.ulife.utils.RedisConstants.FEED_KEY;
 
 /**
  * <p>
@@ -41,6 +44,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private IFollowService followService;
 
     @Override
     public Result queryHotBlog(Integer current) {
@@ -132,7 +138,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         }
         //2.解析出其中的用户id
         // 使用map方法将每个元素转换为对应的Long类型，并使用&oltéot方法将结果收集到一个List中
-        List<Long> ids = top5.stream().map(Long::valueOf).collect(Collectors.toList());
+        List<Long> ids = top5.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
         String idStr = StrUtil.join(",", ids);
         // 3.根据用户id查询用户 WHERE id IN（5，1）ORDER BY FIELD（id，5，1）
         List<UserDTO> userDTOS = userService.query()
@@ -144,6 +152,39 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         //4. 返回
         return Result.ok(userDTOS);
     }
+
+    @Override
+    public Result saveBlog(Blog blog) {
+        // 1.获取登录用户
+        UserDTO user = UserHolder.getUser();
+        blog.setUserId(user.getId());
+        // 2.保存探店博文
+        boolean isSuccess = save(blog);
+        if (!isSuccess) {
+            //2.1成功保存博文到数据库
+            Result.fail("新增笔记失败");
+        }
+
+        // 3.查看笔记作者的所有粉丝
+        List<Follow> follows = followService.query().eq("follow_user_id", user.getId()).list();
+        // 判断当前博主是否有粉丝
+        if (follows.isEmpty()) {
+            //无粉丝，无需执行推送操作
+            return Result.ok();
+        }
+        // 3.给所有（不同的）粉丝推送博客
+        for (Follow follow : follows) {
+            //3.1获取当前粉丝
+            Long userId = follow.getUserId();
+            //3.2不同用户拥有不同的key
+            String key = FEED_KEY + userId;
+            //3.3推送
+            stringRedisTemplate.opsForZSet().add(key, blog.getId().toString(), System.currentTimeMillis());
+        }
+        // 返回id
+        return Result.ok(blog.getId());
+    }
+
 
     //通过博客查询当前用户
     private void queryBlogUser(Blog blog) {
