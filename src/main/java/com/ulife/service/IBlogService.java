@@ -1,5 +1,6 @@
 package com.ulife.service;
 
+import com.ulife.dto.Result;
 import com.ulife.entity.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IBlogService extends IService<Blog> {
 
+    Result queryHotBlog( Integer current);
+
+    Result queryBlogById(Long id);
+
+    Result likeBlog(Long id);
+
+    Result queryBlogLikes(Long id);
 }
