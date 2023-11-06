@@ -31,6 +31,11 @@ public class BlogController {
     private IBlogService blogService;
 
 
+    /**
+     * 保存探店笔记
+     * @param blog
+     * @return
+     */
     @PostMapping
     public Result saveBlog(@RequestBody Blog blog) {
         return blogService.saveBlog(blog);
@@ -38,8 +43,6 @@ public class BlogController {
 
     @PutMapping("/like/{id}")
     public Result likeBlog(@PathVariable("id") Long id) {
-
-
         return blogService.likeBlog(id);
     }
 
@@ -60,6 +63,11 @@ public class BlogController {
         return blogService.queryHotBlog(current);
     }
 
+    /**
+     * 查看探店笔记
+     * @param id
+     * @return
+     */
     @GetMapping("{id}")
     public Result queryBlogById(@PathVariable("id") Long id) {
         return blogService.queryBlogById(id);
@@ -80,5 +88,16 @@ public class BlogController {
         // 获取当前页数据
         List<Blog> records = page.getRecords();
         return Result.ok(records);
+    }
+
+    /**
+     * 关注推送页面的分页查询
+     * @param max 最大的分数值
+     * @param offset 偏移量，第一次为默认值0，不需要偏移
+     * @return
+     */
+    @GetMapping("/of/follow")
+    public Result queryBlogOfFollow(@RequestParam("lastId") Long max, @RequestParam(value = "offset", defaultValue = "0") Integer offset){
+        return blogService.queryBlogOfFollow(max, offset);
     }
 }
